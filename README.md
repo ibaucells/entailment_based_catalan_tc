@@ -26,12 +26,16 @@ python cls_to_nli.py --data_path "projecte-aina/tecla" \
                      --output_dir "."
 ```
 
-## 2. Code to fine-tune and evaluate a model (pre-trained model or NLI model) on the specified TC dataset reformulated as entailment. Specify the desired hyperparameters in finetune.sh and run in the terminal:
+## 2. Code to fine-tune and evaluate a model (pre-trained model or NLI model) on the specified TC dataset reformulated as entailment. 
+
+Specify the desired hyperparameters in finetune.sh and run in the terminal:
 ```
 sh finetune.sh
 ```
 
-## 3. Code to evaluate an entailment model on a text classification task (conversion to NLI at inference time). The arguments needed are the same as those specified for cls_to_nli.py and the model_path (stored in local or in HF).
+## 3. Code to evaluate an entailment model on a text classification task (conversion to NLI at inference time). 
+
+The arguments needed are the same as those specified for cls_to_nli.py and the model_path (stored in local or in HF).
 ```
 python test.py --data_path "projecte-aina/tecla" \
                --model_path "symanto/xlm-roberta-base-snli-mnli-anli-xnli" \
