@@ -2,7 +2,7 @@
 
 This is the repo for the paper "[*Entailment-based Task Transfer for Catalan Text Classification in Small Data Regimes*]", which will be published in the SEPLN 2023 congress. 
 
-1. Code to reformulate a Text Classification (TC) dataset as entailment. Arguments:
+## 1. Code to reformulate a Text Classification (TC) dataset as entailment. Arguments for cls_to_nli.py:
 
 - --data_path: Specifies the path to the dataset in HF used for classification. 
 - --data_split: Specifies the data split to be used (e.g., "train", "test", "validation").
@@ -24,12 +24,12 @@ python cls_to_nli.py --data_path "projecte-aina/tecla" \
                      --output_dir "."
 ```
 
-2. Code to fine-tune and evaluate a model (pre-trained model or NLI model) on the specified TC dataset reformulated as entailment. Specify the desired hyperparameters in finetune.sh and run in the terminal:
+## 2. Code to fine-tune and evaluate a model (pre-trained model or NLI model) on the specified TC dataset reformulated as entailment. Specify the desired hyperparameters in finetune.sh and run in the terminal:
 ```
 sh finetune.sh
 ```
 
-3. Code to evaluate an entailment model on a text classification task (conversion to NLI at inference time). The arguments needed are the same as those specified for cls_to_nli.py and the model_path (stored in local or in HF).
+## 3. Code to evaluate an entailment model on a text classification task (conversion to NLI at inference time). The arguments needed are the same as those specified for cls_to_nli.py and the model_path (stored in local or in HF).
 ```
 python test.py --data_path "projecte-aina/tecla" \
                --model_path "symanto/xlm-roberta-base-snli-mnli-anli-xnli" \
