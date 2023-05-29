@@ -144,8 +144,6 @@ def main(args):
                 label_bool = 0 if label == correct_label else 1
                 hypothesis = f"{template.format(selected_verbalizations[label])}"
                 example = {'id': str(i)+f'_{ii}', 'premise': premise, 'hypothesis': hypothesis, 'label': label_bool, 'cls_label': label}
-                #nli_pairs.append(example)
-                #nli_data.append(nli_pairs)
                 nli_data.append(example)
         # Create the entailment pair and the number of non-entailment pairs per each specified in args
         else:
