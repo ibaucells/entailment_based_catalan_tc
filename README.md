@@ -4,13 +4,13 @@ This is the repo for the paper "[*Entailment-based Task Transfer for Catalan Tex
 
 1. Code to reformulate a Text Classification (TC) dataset as entailment. Arguments:
 
-    --data_path: Specifies the path to the dataset in HF used for classification. 
-    --data_split: Specifies the data split to be used (e.g., "train", "test", "validation").
-    --text_field: Specifies the field name or key in the dataset that contains the text data.
-    --label_field: Specifies the field name or key in the dataset that contains the label data.
-    --template_num: Specifies the template (specified in templates.py) to be used for hypothesis generation.
-    --label_verbalization: Specifies the label verbalizations (from verbalizations.py) to be used for the hypothesis generation.
-    --output_dir: Specifies the directory where the converted dataset will be saved.
+- --data_path: Specifies the path to the dataset in HF used for classification. 
+- --data_split: Specifies the data split to be used (e.g., "train", "test", "validation").
+- --text_field: Specifies the field name or key in the dataset that contains the text data.
+- --label_field: Specifies the field name or key in the dataset that contains the label data.
+- --template_num: Specifies the template (specified in templates.py) to be used for hypothesis generation.
+- --label_verbalization: Specifies the label verbalizations (from verbalizations.py) to be used for the hypothesis generation.
+- --output_dir: Specifies the directory where the converted dataset will be saved.
 
 For instance, to reformulate the TeCla test set (coarse-grained task) using the template "Aquest text tracta sobre {}.", run the following command in the terminal:
 ```
