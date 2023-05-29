@@ -2,7 +2,9 @@
 
 This is the repo for the paper "[*Entailment-based Task Transfer for Catalan Text Classification in Small Data Regimes*]", which will be published in the SEPLN 2023 congress. 
 
-## 1. Code to reformulate a Text Classification (TC) dataset as entailment. Arguments for cls_to_nli.py:
+## 1. Code to reformulate a Text Classification (TC) dataset as entailment. 
+
+Arguments for cls_to_nli.py:
 
 - --data_path: Specifies the path to the dataset in HF used for classification. 
 - --data_split: Specifies the data split to be used (e.g., "train", "test", "validation").
