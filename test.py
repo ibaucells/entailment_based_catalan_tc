@@ -25,10 +25,6 @@ python test.py --data_path "projecte-aina/tecla" \
                --template_num 1 \
                --label_verbalization "verbalizations_templateset2_coarse_grained" \
                 --output_dir "."
-                
-python test.py --data_path "tecla/tecla.py" --model_path "/gpfs/projects/bsc88/projects/entailment_irene/models/roberta-base-ca-v2/wiki_no_teca/output/roberta-base-ca-v2/tecla_nli.py_8_0.00003_date_22-12-21_time_01-40-19/checkpoint-2494" --data_split "test" --text_field "text" --label_field "label1" --template_num 7 --label_verbalization "verbalizations_templateset1_coarse_grained" --output_dir "pruebas_testpy/wiki-no-teca"
-python test.py --data_path "tecla/tecla.py" --model_path "/gpfs/projects/bsc88/projects/entailment_irene/models/symanto_xlm-roberta-base-snli-mnli-anli-xnli" --data_split "test" --text_field "text" --label_field "label1" --template_num 13 --label_verbalization "verbalizations_templateset2_coarse_grained" --output_dir "pruebas_testpy/smax"
-python test.py --data_path "tecla/tecla.py" --model_path "/gpfs/projects/bsc88/projects/entailment_irene/models/roberta-base-ca-v2-te" --data_split "test" --text_field "text" --label_field "label1" --template_num 16 --premise_shortening "first_sentence" --label_verbalization "verbalizations_templateset2_coarse_grained" --output_dir "pruebas_testpy/roberta-te"
 """
 
 def add_base_arguments_to_parser(parser):
@@ -87,13 +83,6 @@ def add_base_arguments_to_parser(parser):
         type=str,
         required=True,
         help='Path to the directory where to save the json with the data converted into the entailment format.'
-    )
-    parser.add_argument(
-        '--use_pipeline',
-        type=str,
-        default="True",
-        required=False,
-        help='Use the HF zero-shot text classification or not to perform inference. Values: True or False.'
     )
 
 
@@ -156,92 +145,48 @@ def main(args):
     predicted_labels = []
     all_entailment_probs = []
     #all_probs_list = []
+ 
+    # Loop over the data and do inference
+    for i, ex in tqdm(enumerate(data)):
+        ex = convert_ids_to_label_names(ex)
+        correct_label = ex[args.label_field]
+        correct_labels.append(correct_label)
+        premise = ex[args.text_field]
 
+        # Apply premise shortening strategy
+        if args.premise_shortening == 'first_sentence': 
+            premise = first_sent_premise(premise)
 
-    if args.use_pipeline == "False":   
-        print("Inference with no HF pipeline.")    
-        # Loop over the data and 
-        for i, ex in tqdm(enumerate(data)):
-            ex = convert_ids_to_label_names(ex)
-            correct_label = ex[args.label_field]
-            correct_labels.append(correct_label)
-            premise = ex[args.text_field]
+        # Create the batch of premise-hypothesis pairs
+        # for the ith example
+        batch = []
+        for label in labels:
+            hypothesis = f"{template.format(selected_verbalizations[label])}"
+            batch.append([premise, hypothesis])
 
-            # Apply premise shortening strategy
-            if args.premise_shortening == 'first_sentence': 
-                premise = first_sent_premise(premise)
-             
-            # Create the batch of premise-hypothesis pairs
-            # for the ith example
-            batch = []
-            for label in labels:
-                hypothesis = f"{template.format(selected_verbalizations[label])}"
-                batch.append([premise, hypothesis])
-            
-            # 1) Encode input pairs
-            batch_encoded = tokenizer(batch,padding=True,truncation=True,return_tensors="pt").to(device)
+        # 1) Encode input pairs
+        batch_encoded = tokenizer(batch,padding=True,truncation=True,return_tensors="pt").to(device)
 
-            # 2) Obtain the logits for [entailment, neutral, contradiction]
-            classification_logits = nli_model(**batch_encoded).logits
+        # 2) Obtain the logits for [entailment, neutral, contradiction]
+        classification_logits = nli_model(**batch_encoded).logits
 
-            # 3) Calculate softmax probabilities
-            # Softmax of entailment probabilities
-            softmax_results = torch.softmax(classification_logits, dim=0).tolist()
-            # Softmax within each [entailment, neutral, contradiction] (usually used for multi-label classification)
-            #softmax_results_per_class = [torch.softmax(logits, dim=0).tolist() for logits in classification_logits]
+        # 3) Calculate softmax probabilities
+        # Softmax of entailment probabilities
+        softmax_results = torch.softmax(classification_logits, dim=0).tolist()
 
-            # Get only the entailment probabilities
-            results_entailment = [ent_prob[0] for ent_prob in softmax_results]
-            dic_ordered_entailment_probs = {label:results_entailment[j] for j,label in enumerate(labels)}
-            all_entailment_probs.append(dic_ordered_entailment_probs)
+        # Get only the entailment probabilities
+        results_entailment = [ent_prob[0] for ent_prob in softmax_results]
+        dic_ordered_entailment_probs = {label:results_entailment[j] for j,label in enumerate(labels)}
+        all_entailment_probs.append(dic_ordered_entailment_probs)
 
-            # Get the index of the element with highest probability and map it to the label, which will be the predicted label
-            index_highest_prob = np.argmax(results_entailment)
-            predicted_label = labels[index_highest_prob]
+        # Get the index of the element with highest probability and map it to the label, which will be the predicted label
+        index_highest_prob = np.argmax(results_entailment)
+        predicted_label = labels[index_highest_prob]
 
-            # Save the predicted label in the list
-            predicted_labels.append(predicted_label)
-
-            # Store all softmax probabilities (entailment, neutral, contradiction) for each label
-            #dic_ordered_all_probs = {label:softmax_results_per_class[j] for j,label in enumerate(labels)}
-            #all_probs_list.append(dic_ordered_all_probs)
-
-    else:
-        print("Inference with HF pipeline.")    
-        # Load the zero-shot-classification pipeline if chosen
-        classifier = pipeline("zero-shot-classification", model=nli_model, tokenizer=tokenizer, hypothesis_template=template, device=0)
-        candidates = [selected_verbalizations[label] for label in labels]
-        # Loop over the data and 
-        for i, ex in tqdm(enumerate(data)):
-            ex = convert_ids_to_label_names(ex)
-            correct_label = ex[args.label_field]
-            correct_labels.append(correct_label)
-            premise = ex[args.text_field]
-
-            # Apply premise shortening strategy
-            if args.premise_shortening == 'first_sentence': 
-                premise = first_sent_premise(premise)
-
-            results_entailment = classifier(premise, candidates)
-
-            # Get the predicted label and save it in the list
-            predicted_label = results_entailment['labels'][0]
-            predicted_label = selected_verbalizations_inv[predicted_label]
-            predicted_labels.append(predicted_label)
-
-            # Get only the entailment probabilities
-            all_entailment_probs = results_entailment['scores']
-            #dic_ordered_entailment_probs = dict(sorted(dic_entailment_probs.items()))
-            #all_entailment_probs.append(dic_ordered_entailment_probs)
-            #breakpoint()
-
-            # Calculate and store the softmax entailment probabilities within each [entailment, neutral, contradiction] for each label
-            #softmax_results_per_class = classifier(premise, candidates, multi_label=True)
-            #dic_all_probs = {candidate_labels_dict[label_template]:softmax_results_per_class['scores'][i] for i,label_template in enumerate(softmax_results_per_class['labels'])}
-            #dic_ordered_all_probs = dict(sorted(dic_all_probs.items()))
-            #all_probs_list.append(dic_ordered_all_probs)
-            #breakpoint()
-
+        # Save the predicted label in the list
+        predicted_labels.append(predicted_label)
+        
+    # Save the predictions and results in the specified folder
     os.makedirs(args.output_dir, exist_ok=True)
     with open(os.path.join(args.output_dir, 'predicted_labels.txt'), "w") as f:
         print(predicted_labels, file = f)
@@ -252,8 +197,6 @@ def main(args):
     report = classification_report(correct_labels, predicted_labels, digits=4)
     with open(os.path.join(args.output_dir, 'report.txt'), "w") as f:
         print(report, file = f)
-
-    return 0
 
 
 
