@@ -1,6 +1,6 @@
 # Entailment-based Task Transfer for Catalan Text Classification in Small Data Regimes
 
-This is the repo for the paper "[*Entailment-based Task Transfer for Catalan Text Classification in Small Data Regimes*]", which will be published in the SEPLN 2023 Conference. It contains the essential code required for the experiments
+This is the repo for the paper "*Entailment-based Task Transfer for Catalan Text Classification in Small Data Regimes*", which will be published in the SEPLN 2023 Conference. It contains the essential code required for the experiments.
 
 ## 1. Code to reformulate a Text Classification (TC) dataset as entailment. 
 
