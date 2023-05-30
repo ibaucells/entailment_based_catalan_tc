@@ -47,7 +47,7 @@ python test.py --data_path "projecte-aina/tecla" \
                --output_dir "."
 ```
 
-Additionally, we have made accesible [CaWikiTC](https://huggingface.co/ibaucells/CaWikiTC), the Wikipedia-based dataset automatically created as the task transfer source, and the task-transfer [RoBERTa-ca-CaWikiTC](https://huggingface.co/ibaucells/RoBERTa-ca-CaWikiTC) model trained on this data converted to NLI .
+Additionally, we have made accesible [CaWikiTC](https://huggingface.co/datasets/projecte-aina/CaWikiTC), the Wikipedia-based dataset automatically created as the task transfer source, and the task-transfer [RoBERTa-ca-CaWikiTC](https://huggingface.co/projecte-aina/roberta-base-ca-v2-cawikitc) model trained on this data converted to NLI .
 
 
 ## 📣 Citation
